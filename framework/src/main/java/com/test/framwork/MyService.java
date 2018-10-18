@@ -31,8 +31,7 @@ public class MyService extends Service implements View.OnClickListener, ViewMana
         windowParams = new WindowManager.LayoutParams();
         windowParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         windowParams.format = PixelFormat.RGBA_8888;
-        windowParams.flags = WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
+        windowParams.flags =  WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 //                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         windowParams.gravity = Gravity.LEFT | Gravity.TOP;
         windowParams.width = 800;
