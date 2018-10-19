@@ -2,6 +2,8 @@ package com.test.framwork;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
+import android.support.v4.content.ContextCompat;
 
 /**
  * @ClassName: App
@@ -11,7 +13,6 @@ import android.content.Intent;
  */
 public class Sdk {
    public static void init(Context context){
-       context.startService(new Intent(context, MyService.class));
-
+       ContextCompat.startForegroundService(context,new Intent(context, MyService.class));
    }
 }

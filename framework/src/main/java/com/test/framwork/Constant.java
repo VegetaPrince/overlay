@@ -9,4 +9,5 @@ package com.test.framwork;
 public class Constant {
     public static final String KEY_OVER_MODEL = "key_over_model";
     public static final String OVER_MODEL = "small";
+    public static final String OVER_MODEL_ENTER_APP_PKG = "over_model_enter_app_pkg";
 }

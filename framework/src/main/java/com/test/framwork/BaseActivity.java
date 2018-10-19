@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
@@ -13,7 +14,7 @@ import android.widget.LinearLayout;
 
 /**
  * @ClassName: BaseActivity
- * @Description: java类作用描述
+ * @Description: 模拟系统framework基类
  * @Author: flying
  * @CreateDate: 2018/10/18 14:32
  */
@@ -24,6 +25,7 @@ public class BaseActivity extends Activity {
     private boolean create = true;
     private View mainView;
     private WindowManager.LayoutParams p;
+    private OverEntity overEntity = new OverEntity();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -40,8 +42,8 @@ public class BaseActivity extends Activity {
         root.getLayoutParams().width = d.getWidth();
         root.getLayoutParams().height = d.getHeight();
         p = getWindow().getAttributes();  //获取对话框当前的参数值
-        p.height = d.getHeight() ;
-        p.width = d.getWidth();
+        p.height = d.getHeight() * 4 / 5;
+        p.width = d.getWidth() * 4 / 5;
     }
 
     @Override
@@ -53,6 +55,10 @@ public class BaseActivity extends Activity {
         initBeforeContentView();
         mainView = view;
         root.addView(mainView);
+
+        overEntity.mainView = mainView;
+        overEntity.pkg = getPackageName();
+        overEntity.onExitOverListener = onExitOverListener;
         super.setContentView(root);
     }
 
@@ -79,9 +85,24 @@ public class BaseActivity extends Activity {
         setIntent(intent);
         Log.v(TAG, "onNewIntent:" + getIntent().getStringExtra(Constant.KEY_OVER_MODEL));
         if (Constant.OVER_MODEL.equals(getIntent().getStringExtra(Constant.KEY_OVER_MODEL))) {
-            root.removeAllViews();
-            ViewManager.getInstance().enterOver(mainView, onExitOverListener);
+            ViewManager.getInstance().onPause(overEntity);
+            Intent service = new Intent(getApplicationContext(), MyService.class);
+            service.putExtra(Constant.OVER_MODEL_ENTER_APP_PKG, getPackageName());
+            ContextCompat.startForegroundService(getApplicationContext(),service);
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        root.removeAllViews();
+        ViewManager.getInstance().onPause(overEntity);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+//        ViewManager.getInstance().onDestroy(overEntity);
     }
 
     public ViewManager.OnExitOverListener onExitOverListener = new ViewManager.OnExitOverListener() {

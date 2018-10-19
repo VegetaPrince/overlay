@@ -7,7 +7,8 @@
 
 
     <application>
-        <service android:name="com.test.framwork.MyService"></service>
+        <service android:name="com.test.framwork.MyService"
+        android:exported="true"></service>
     </application>
 
 </manifest>

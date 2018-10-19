@@ -1,8 +1,5 @@
 package com.test.framwork;
 
-import android.content.Context;
-import android.content.Intent;
-import android.util.Log;
 import android.view.View;
 
 import java.util.HashMap;
@@ -15,8 +12,7 @@ import java.util.Map;
  * @CreateDate: 2018/10/18 15:36
  */
 public class ViewManager {
-    private Map<View, OnExitOverListener> overMap = new HashMap<>();
-    private OnEnterOverListener onEnterOverListener;
+    private Map<String, OverEntity> overEntityMap = new HashMap<>();
 
     private static final String TAG = ViewManager.class.getSimpleName();
 
@@ -31,21 +27,16 @@ public class ViewManager {
         return Inner.INSTANCE;
     }
 
-    public void enterOver(View view, OnExitOverListener onExitOverListener) {
-        overMap.put(view, onExitOverListener);
-        onEnterOverListener.enterOver(view);
+    public OverEntity getOverEntity(String pkg) {
+        return overEntityMap.get(pkg);
     }
 
-    public void setOnEnterOverListener(OnEnterOverListener listener) {
-        Log.v(TAG, "setOnEnterOverListener");
-        onEnterOverListener = listener;
+    public void onPause(OverEntity entity) {
+        overEntityMap.put(entity.pkg, entity);
     }
 
-
-    public void exitOver(View view) {
-        if (overMap.containsKey(view)) {
-            overMap.get(view).exitOver(view);
-        }
+    public void onDestroy(OverEntity entity) {
+        overEntityMap.remove(entity.pkg);
     }
 
 
@@ -53,7 +44,4 @@ public class ViewManager {
         void exitOver(View view);
     }
 
-    public interface OnEnterOverListener {
-        void enterOver(View view);
-    }
 }

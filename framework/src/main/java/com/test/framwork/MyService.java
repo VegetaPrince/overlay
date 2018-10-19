@@ -1,15 +1,17 @@
 package com.test.framwork;
 
-import android.app.Activity;
-import android.app.Service;
+import android.app.*;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.*;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 /**
  * @ClassName: MyService
@@ -17,21 +19,30 @@ import android.widget.RelativeLayout;
  * @Author: flying
  * @CreateDate: 2018/10/18 15:23
  */
-public class MyService extends Service implements View.OnClickListener, ViewManager.OnEnterOverListener {
+public class MyService extends Service implements View.OnClickListener {
     private static final String TAG = MyService.class.getSimpleName();
+    private static final String CHANNEL_ID = "1";
+    private static final CharSequence CHANNEL_NAME = "test";
     private WindowManager windowManager;
     private View overLayout;
     private WindowManager.LayoutParams windowParams;
-    private View mainView;
-    RelativeLayout container;
+    private RelativeLayout container;
+    private OverEntity overEntity;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        NotificationChannel channel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH);
+        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        manager.createNotificationChannel(channel);
+        Notification notification = new Notification.Builder(getApplicationContext(), CHANNEL_ID).build();
+        startForeground(1, notification);
+
+
         windowParams = new WindowManager.LayoutParams();
         windowParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         windowParams.format = PixelFormat.RGBA_8888;
-        windowParams.flags =  WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+        windowParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 //                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         windowParams.gravity = Gravity.LEFT | Gravity.TOP;
         windowParams.width = 800;
@@ -84,7 +95,6 @@ public class MyService extends Service implements View.OnClickListener, ViewMana
                 return ret;
             }
         });
-        ViewManager.getInstance().setOnEnterOverListener(MyService.this);
     }
 
     @Nullable
@@ -92,6 +102,20 @@ public class MyService extends Service implements View.OnClickListener, ViewMana
     public IBinder onBind(Intent intent) {
         return null;
 
+    }
+
+    @Override
+    public void onStart(Intent intent, int startId) {
+        super.onStart(intent, startId);
+        enterOver(intent);
+        Log.v(TAG, "onStart");
+
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.v(TAG, "onStartCommand");
+        return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
@@ -105,16 +129,22 @@ public class MyService extends Service implements View.OnClickListener, ViewMana
     }
 
     private void exitOver() {
+        Log.v(TAG, "exitOver");
         container.removeAllViews();
         windowManager.removeView(overLayout);
-        ViewManager.getInstance().exitOver(mainView);
+        overEntity.onExitOverListener.exitOver(overEntity.mainView);
     }
 
-    @Override
-    public void enterOver(View view) {
-        mainView = view;
+    public void enterOver(Intent intent) {
+        String pkg = intent.getStringExtra(Constant.OVER_MODEL_ENTER_APP_PKG);
+        if (TextUtils.isEmpty(pkg)) {
+            return;
+        }
+        Log.v(TAG, "exitOver:" + pkg);
+
+        overEntity = ViewManager.getInstance().getOverEntity(pkg);
         container.removeAllViews();
-        container.addView(mainView);
+        container.addView(overEntity.mainView);
         windowManager.addView(overLayout, windowParams);
     }
 }
